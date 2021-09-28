@@ -1,0 +1,137 @@
+<form theme="dark">
+  <init>
+    <set token="rule_id">| search</set>
+  </init>
+  <label>Correlation Search Development and Tuning</label>
+  <search id="eventsBase">
+    <query>| `incident_review` 
+    | eval end = if("$time_2.latest$"=="now", "now()", "$time_2.latest$") 
+    | eval start = if(match("$time_2.earliest$","^-"),relative_time(now(), "$time_2.earliest$"), "$time_2.earliest$") 
+    | where _time&gt;start AND _time&lt;end 
+    | rename status_label as default_status 
+    | search $status$
+    | table time rule_name comment rule_id  status owner owner_realname reviewer reviewer_realname 
+     | eval long_name="$selectedRule$"
+      | eval long_name = replace(long_name,"^[^-]+-\s+",""), long_name = replace(long_name,"\s+-\s+Rule$", "")
+     
+     | sort rule_name rule_id time | rename rule_name as search_name   | where LIKE(search_name,long_name) </query>
+    <earliest>$earliest$</earliest>
+    <latest>$latest$</latest>
+  </search>
+  <fieldset submitButton="false">
+    <input type="time" token="time_2">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="radio" token="status">
+      <label>Search Status</label>
+      <choice value="">All</choice>
+      <choice value="default_status IN (test*,14)">Development</choice>
+      <choice value="NOT default_status IN (test*,14)">Production</choice>
+      <default></default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Using This Dashboard</title>
+      <html>
+        <p>You can use this dashboard to see all of the enabled correlation searches at a glance, see their comments if they exist, and jump to the Incident Review dashboard. The panel sub-titles will tell you what actions clicking a row will trigger.</p> 
+
+<p>Start by clicking a rule you’d like to investigate. After clicking a rule, three new panels will appear, your selected correlation search, a count of comments in incidents, and the details of incident events. If you click on the name of the search in the selected search panel, you will be taken to Incident Review, where you will see the name of the search you selected and the date will also already be set based on your last view. If you click on a row in one of the two Incident history-related panels the events will be filtered to a specific rule_id. To investigate a different correlation search, simply return to the top, adjust your parameters if desired, and click on a new rule name. 
+</p>
+        <p>The Incident Event panels will only populate if there are notable history events. E.g, A status change, comment, assigned user etc. </p>
+          </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Filtered Correlation Searches</title>
+      <table>
+        <title>Click correlation search  name to filter incident history.</title>
+        <search id="rulesBase">
+          <query>index=notable earliest=$time_2.earliest$ latest=$time_2.latest$ 
+    [| rest splunk_server=local count=0 /services/saved/searches 
+| where match('action.correlationsearch.enabled', "1|[Tt]|[Tt][Rr][Uu][Ee]") 
+| rename eai:acl.app as app, title as csearch_name, action.correlationsearch.label as csearch_label, action.notable.param.security_domain as security_domain, action.notable.param.default_status as default_status 
+| search $status$ 
+| table csearch_name, csearch_label, app, security_domain, description, default_status | fields csearch_name | rename csearch_name as query ] 
+| eval source1 = replace(source,"^[^-]+-\s+",""), source1 = replace(source1,"\s+-\s+Rule$", "") 
+| stats count values(source1) as source1 by source 
+| sort - count 
+| join type=left source1 
+    [| `incident_review` 
+    | eval end = if("$time_2.latest$"=="now", "now()", "$time_2.latest$") 
+    | eval start = if(match("$time_2.earliest$","^-"),relative_time(now(), "$time_2.earliest$"), "$time_2.earliest$") 
+    | where _time&gt;start AND _time&lt;end 
+    | rename status_label as default_status 
+    | search $status$
+    | eval r0 = rule_id 
+    | makemv delim="@@" r0 
+    | eval r1=mvindex(r0,1), r2=mvindex(r0,0), r3=mvindex(r0,2) 
+    | stats count as notable_history_count by rule_name 
+    | rename rule_name as source1 ] 
+| fields - source1 | rename source as search_name</query>
+          <earliest>$time_2.earliest$</earliest>
+          <latest>$time_2.latest$</latest>
+        </search>
+        <option name="refresh.display">progressbar</option>
+        <option name="totalsRow">false</option>
+        <drilldown>
+          <set token="selectedRule">$click.value$</set>
+          <set token="rule_id">| search</set>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$selectedRule$">
+      <title>Selected Correlation Search</title>
+      <table>
+        <title>Click search name to view in Incident Review</title>
+        <search base="rulesBase">
+          <query>| search search_name="$selectedRule$" | fields search_name</query>
+        </search>
+        <option name="refresh.display">progressbar</option>
+        <option name="totalsRow">false</option>
+        <drilldown>
+          <link target="_blank">
+            <![CDATA[ https://<SplunkESInstance>/en-US/app/SplunkEnterpriseSecuritySuite/incident_review?source=$click.value$&latest=$time_2.latest$&earliest=$time_2.earliest$ ]]>
+          </link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$selectedRule$">
+      <title>Incidents (rule_id)</title>
+      <table>
+        <title>Click rule_id to filter a specific incident - (Will not populate if notable_history_count is 0 or NULL)</title>
+        <search base="eventsBase">
+          <query>| stats count by rule_id | sort - count</query>
+        </search>
+        <option name="count">5</option>
+        <drilldown>
+          <set token="rule_id" prefix="| search rule_id=" suffix=" ">$click.value$</set>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$selectedRule$">
+      <title>Incident History</title>
+      <table>
+        <title>Click rule_id to filter a specific incident - (Will not populate if notable_history_count is 0 or NULL)</title>
+        <search base="eventsBase">
+          <query> $rule_id$</query>
+        </search>
+        <option name="count">5</option>
+        <drilldown>
+          <set token="rule_id" prefix="| search rule_id=" suffix=" ">$row.rule_id$</set>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+</form>
