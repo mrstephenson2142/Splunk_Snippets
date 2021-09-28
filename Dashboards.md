@@ -1,6 +1,6 @@
 # Dashboards 
 
-## (Correlation Search Tuning Dashboard)[Dashboards/correlation_search_tuning.xml]
+## [Correlation Search Tuning Dashboard](Dashboards/correlation_search_tuning.xml)
 
 [correlation_search_tuning.xml](Dashboards/correlation_search_tuning.xml) contains a dashboard that could be useful in quickly reviewing dashboards and jumping to incident response to further explore new and existing correlation searches. 
 
