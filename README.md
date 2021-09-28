@@ -2,7 +2,7 @@
 
 This repo contains search snippets, dashboards, Splunk related links, and projects I've wanted to document and catalog. 
 
-I've just started putting this repo together and am still digging through old notes, sanitizing queries and dashboards, and clearing them for posting. This is an ongoing project. If you want to chat feel free to reach out on LinkedIn <https://www.linkedin.com/in/micheal-r-stephenson/>. 
+I've just started putting this repo together and am still digging through old notes, sanitizing queries and dashboards, and clearing them for posting. This is an ongoing project. If you want to chat, feel free to reach out on LinkedIn <https://www.linkedin.com/in/micheal-r-stephenson/>. 
 
 
 
