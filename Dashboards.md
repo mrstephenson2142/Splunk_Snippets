@@ -2,7 +2,7 @@
 
 ## Correlation Search Tuning Dashboard 
 
-[correlation_search_tuning.xml](Dashboards/correlation_search_tuning.xml contains a dashboard that could be useful in quickly reviewing dashboards and jumping to incident response to further explore new and existing correlation searches. 
+[correlation_search_tuning.xml](Dashboards/correlation_search_tuning.xml) contains a dashboard that could be useful in quickly reviewing dashboards and jumping to incident response to further explore new and existing correlation searches. 
 
 You'll need to change test and 14 to whatever you use for test statuses.
 
