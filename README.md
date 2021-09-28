@@ -1,6 +1,10 @@
 # Splunk Snippets
 
-This is a repo that contains some of the Splunk items I've worked on, the information I've had to look up, interesting searches, and more. Some of the information I've shared with mentees and many of the items have been sourced from the Splunk community or posts in the anals of Splunk Answers.  
+This repo contains search snippets, dashboards, Splunk related links, and projects I've wanted to document and catalog. 
+
+I've just started putting this repo together and am still digging through old notes, sanitizing queries and dashboards, and clearing them for posting. This is an ongoing project. If you want to chat feel free to reach out on LinkedIn <https://www.linkedin.com/in/micheal-r-stephenson/>. 
+
+
 
 - [Dashboards](./Dashboards.md)
 - [Links](#links)
